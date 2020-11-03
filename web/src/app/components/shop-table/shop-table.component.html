@@ -1,0 +1,51 @@
+<div *ngIf="dataSource" class="shop-table">
+  <h3>Ausgewählte Filialen</h3>
+  <div class="mat-elevation-z8">
+    <table mat-table [dataSource]="dataSource">
+      <ng-container matColumnDef="selected">
+        <th mat-header-cell *matHeaderCellDef>Selected</th>
+        <td class="checkbox" mat-cell *matCellDef="let row">
+          <mat-checkbox
+            color="primary"
+            (click)="$event.stopPropagation()"
+            (change)="$event ? selection.toggle(row) : null"
+            [checked]="selection.isSelected(row)"
+          >
+          </mat-checkbox>
+        </td>
+      </ng-container>
+
+      <ng-container matColumnDef="shopnumber">
+        <th mat-header-cell *matHeaderCellDef>Filialnummer</th>
+        <td mat-cell *matCellDef="let row">{{ row.FilialNr }}</td>
+      </ng-container>
+
+      <ng-container matColumnDef="name">
+        <th mat-header-cell *matHeaderCellDef>Name</th>
+        <td mat-cell *matCellDef="let row">{{ row.Name }}</td>
+      </ng-container>
+
+      <ng-container matColumnDef="address">
+        <th mat-header-cell *matHeaderCellDef>Adresse</th>
+        <td mat-cell *matCellDef="let row">{{ row.Adresse }}</td>
+      </ng-container>
+
+      <ng-container matColumnDef="rayon">
+        <th mat-header-cell *matHeaderCellDef>Rayon</th>
+        <td mat-cell *matCellDef="let row">{{ row.Rayon }}</td>
+      </ng-container>
+
+      <tr mat-header-row *matHeaderRowDef="displayedColumns"></tr>
+      <tr mat-row *matRowDef="let row; columns: displayedColumns"></tr>
+    </table>
+    <div class="action-row">
+      <button color="warn" (click)="handleDelete()" mat-button>
+        <mat-icon>delete</mat-icon>Delete
+      </button>
+      <mat-paginator
+        [pageSizeOptions]="[15, 30, 45]"
+        showFirstLastButtons
+      ></mat-paginator>
+    </div>
+  </div>
+</div>
