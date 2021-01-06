@@ -46,26 +46,44 @@ Set-StrictMode -Version Latest;
 $promt = [Promt]::new();
 ```
 
-Now it's time to work some magic. We're adding some endpoints to the promt webserver. We can do this by either specifying the HTTP method like `$promt.Get` or `$promt.Post` or just use any method `$promt.Add`. These methods take both a url and a funciton to handle the request as an argument. The function will then be called with the `Request` and `Response` object of the HTTP listener to have access to all data needed to handle the request.
+Now it's time to work some magic. We're adding some endpoints to the promt webserver. We can do this by either specifying the HTTP method like `$promt.Get` or `$promt.Post` or just use any method `$promt.Add`. These methods take both a url and a scriptblock to handle the request as an argument. The scriptblock will be called with the `Request` and `Response` object of the HTTP listener to have access to all data needed to handle the request.
 
 ```PowerShell
-function GetADUser([HttpListenerRequest]$req, [HttpListenerResponse]$res) {
-    # Get username from the querystring
-    # HTTP request URL: http://localhost:3000/aduser?userprincipalname=test
-    $userprincipalname = $req.QueryString["userprincipalname"];
-    $adUser = Get-ADUser -Filter "userprincipalname -eq '$userprincipalname'";
+$GetADUserHandle = {
+  param(
+    [HttpListenerRequest]$req,
+    [HttpListenerResponse]$res
+  );
 
-    # Savely throw erros which are then sent to the client
-    if(!$adUser) {
-        throw "The user with the username $userprincipalname was not found";
-    }
+  # Get username from the querystring
+  # HTTP request URL: http://localhost:3000/aduser?userprincipalname=test
+  $userprincipalname = $req.QueryString["userprincipalname"];
+  $adUser = Get-ADUser -Filter "userprincipalname -eq '$userprincipalname'";
 
-    # Return the value to be sent back to the client
-    return $adUser;
+  # You can throw erros which are then sent to the client
+  if(!$adUser) {
+    throw "The user with the username $userprincipalname was not found";
+  }
+
+  # Return the value to be sent back to the client
+  return $adUser;
 }
 
 # Register the handle
-$promt.Get("aduser", $function:GetADUser);
+$promt.Get("aduser", $GetADUser);
+```
+
+In addition you can also directly register the handler scriptblock in the method:
+
+```PowerShell
+$promt.Get("test", {
+    param(
+      [HttpListenerRequest]$req,
+      [HttpListenerResponse]$res
+    );
+
+    return @{ Test = "User" };
+  });
 ```
 
 Now you can use `$promt.Start()` to start your application. Promt will then automatically open the default browser if the public file exists. By default this is ./public/index.html and can be overwritten in the constructor.

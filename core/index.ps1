@@ -7,14 +7,29 @@ function main {
   # Init Promt
   $promt = [Promt]::new();
 
-  function GetTest([HttpListenerRequest]$req, [HttpListenerResponse]$res) {
-    return @{ Test = "User" };
+  # Register handler for incoming requests
+  $promt.Get("test", {
+      param(
+        [HttpListenerRequest]$req, 
+        [HttpListenerResponse]$res
+      );
+
+      return @{ Test = "User" };
+    });
+
+  # Create a handler without mapping it
+  $fooHandle = {
+    param(
+      [HttpListenerRequest]$req, 
+      [HttpListenerResponse]$res
+    );
+
+    return @{ Bar = "Baz" };
   }
 
-  # Register handler for incoming requests
-  $promt.Get("test", $function:GetTest);
-
-  $promt.Start()
+  # Map handler scriptblock
+  $promt.Get("foo", $fooHandle);
+  $promt.Start();
 }
 
 main;

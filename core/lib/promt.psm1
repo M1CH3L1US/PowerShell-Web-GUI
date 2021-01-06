@@ -103,7 +103,7 @@ class Promt {
     $this.Stop();
   }
 
-  [psobject] _GetHandle([string]$method, [URI]$url) {
+  [ScriptBlock] _GetHandle([string]$method, [URI]$url) {
     # Get matching request handle for url + method
     $handle = $this.Handles | ? { ($_.Method -eq $method -or $_.Method -eq '*') -and $_.Url.AbsolutePath -eq $url.AbsolutePath }
     
@@ -133,7 +133,7 @@ class Promt {
 
       # Invoke request handler
       $this._WriteOutput("Invoking handle for [$method] $($req.URL)", "yellow");	
-      $data = Invoke-Command $handle -ArgumentList $req, $res;
+      $data = $handle.Invoke($req, $res);
         
       # Handle empty return
       if (!$data) {
@@ -208,31 +208,31 @@ class Promt {
     return $data
   }
  
-  [void] Add([string]$url, $requestHande) {
+  [void] Add([string]$url, [ScriptBlock]$requestHande) {
     $this._AddHandle("*", $url, $requestHande);
   }
 
-  [void] Get([string]$url, $requestHande) {
+  [void] Get([string]$url, [ScriptBlock]$requestHande) {
     $this._AddHandle("GET", $url, $requestHande);
   }
 
-  [void] Post([string]$url, $requestHande) {
+  [void] Post([string]$url, [ScriptBlock]$requestHande) {
     $this._AddHandle("POST", $url, $requestHande);
   }
 
-  [void] Delete([string]$url, $requestHande) {
+  [void] Delete([string]$url, [ScriptBlock]$requestHande) {
     $this._AddHandle("DELETE", $url, $requestHande);
   }
 
-  [void] Put([string]$url, $requestHande) {
+  [void] Put([string]$url, [ScriptBlock]$requestHande) {
     $this._AddHandle("PUT", $url, $requestHande);
   }
 
-  [void] Patch([string]$url, $requestHande) {
+  [void] Patch([string]$url, [ScriptBlock]$requestHande) {
     $this._AddHandle("PATCH", $url, $requestHande);
   }
 
-  [void] _AddHandle([string]$method, [string]$url, $requestHande) {
+  [void] _AddHandle([string]$method, [string]$url, [ScriptBlock]$requestHande) {
     $uri = [URI]::new($this.URL + $url);
     $this._WriteOutput("Mounting request handler for [$method] $uri", "Green");
 
